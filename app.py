@@ -2,517 +2,199 @@ import os
 from flask import Flask, render_template, jsonify, request, abort, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import setup_db, Restaurant, Reservation, Customer, db
+from models import setup_db, Movie, Actor
 import os
-from datetime import datetime
 from auth import AuthError, requires_auth
 
-app = Flask(__name__)
-setup_db(app)
-CORS(app)
 
-NUM_PER_PAGE = 10
+def create_app(test_config=None):
+    # create and configure app
+    app = Flask(__name__)
+    CORS(app)
 
+    setup_db(app)
+    # set access control allow
 
-def paginate_restaurants(request, selection):
-    page = request.args.get('page', 1, type=int)
-    start = (page-1)*NUM_PER_PAGE
-    end = start + NUM_PER_PAGE
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, \
+          PATCH, DELETE, OPTIONS')
+        return response
 
-    restaurants = [restaurant.format() for restaurant in selection]
-    current_restaurants = restaurants[start:end]
+    @app.route('/')
+    def get_greeting():
+        greeting = "Hello"
+        return greeting
 
-    return current_restaurants
+    @app.route('/movies', methods=['GET'])
+    @requires_auth('get:movies')
+    def get_movies(payload):
+        try:
+            movies = Movie.query.all()
+            if len(movies) == 0:
+                abort(404)
 
-
-def capacity_check(check_time, rest_id, number):
-    rest = Restaurant.query.filter(Restaurant.id == rest_id).one_or_none()
-    reservations = Reservation.query.filter(Reservation.rest_id == rest_id)
-    reserved_number = 0
-    capacity = rest.capacity
-    check_time = datetime.strptime(check_time, '%Y-%m-%d %H:%M:%S')
-
-    for reservation in reservations:
-        if reservation.time == check_time:
-            reserved_number += reservation.number
-
-    total_number = reserved_number + int(number)
-    if total_number <= capacity:
-        return True
-    else:
-        return False
-
-
-@app.route('/')
-def index():
-    return redirect('https://hrban.auth0.com/authorize?audience=reservation&response_type=token&client_id=xnDUNOvj9p9HAkqHLvFabfh5zuwat9uQ&redirect_uri=https://capstone-reservation-service.herokuapp.com/login-results')
-
-
-@app.route('/login-results')
-def login_results():
-    return ("Check your token!")
-
-# restaurants
-@app.route('/restaurants')
-@requires_auth('get:restaurants')
-def get_restaurants_list(jwt):
-    selection = Restaurant.query.order_by(Restaurant.id).all()
-    current_restaurants = paginate_restaurants(request, selection)
-
-    return jsonify(
-        {
-            'restaurants': current_restaurants,
-            'total_restaurants': len(Restaurant.query.all()),
-            'success': True
-        }
-    )
-
-
-@app.route('/restaurants/create', methods=['POST'])
-@requires_auth('post:restaurants')
-def create_restaurants(jwt):
-    body = request.get_json()
-
-    if body is None:
-        abort(422)
-
-    rest = Restaurant()
-
-    rest.name = body.get('name')
-    rest.address = body.get('address')
-    rest.category = body.get('category')
-    rest.photo = body.get('photo', None)
-    rest.tel = body.get('tel')
-    rest.menu = body.get('menu')
-    rest.capacity = body.get('capacity')
-    rest.open_time = body.get('open_time')
-    rest.close_time = body.get('close_time')
-
-    rest.insert()
-
-    selection = Restaurant.query.order_by(Restaurant.id).all()
-
-    current_restaurnats = paginate_restaurants(request, selection)
-
-    return jsonify(
-        {
-            'current_restaurants': current_restaurnats,
-            'total_restaurants': len(current_restaurnats),
-            'success': True,
-            'created': rest.id
-        }
-    )
-
-
-@app.route('/restaurants/search', methods=['POST'])
-@requires_auth('search:restaurants')
-def search_restaurants(jwt):
-    searchTerm = request.args.get('searchTerm', '', type=str)
-
-    selection = Restaurant.query.order_by(Restaurant.id).filter(
-        Restaurant.name.ilike('%{}%'.format(searchTerm))).all()
-    current_restaurants = paginate_restaurants(request, selection)
-
-    return jsonify(
-        {'current_restaurants': current_restaurants,
-            'total_restaurants': len(current_restaurants),
-            'success': True}
-    )
-
-
-@app.route('/restaurants/<int:rest_id>')
-@requires_auth('get:restaurant')
-def show_restaurant(jwt, rest_id):
-    restaurant = Restaurant.query.filter(
-        Restaurant.id == rest_id).one_or_none()
-
-    if restaurant is None:
-        abort(404)
-
-    else:
-        return jsonify(
-            {
+            return jsonify({
                 'success': True,
-                'restaurant': restaurant.format(),
-                'rest_id': rest_id
-            }
-        )
+                'movies': [movie.long() for movie in movies],
+                'total movies': len(movies)
+            }), 200
 
+        except Exception as error:
+            raise error
 
-@app.route('/restaurants/<int:rest_id>', methods=['DELETE'])
-@requires_auth('delete:restaurant')
-def delete_restaurant(jwt, rest_id):
-    restaurant = Restaurant.query.filter(
-        Restaurant.id == rest_id).one_or_none()
+    @app.route('/actors', methods=['GET'])
+    @requires_auth('get:actors')
+    def get_actors(payload):
+        actors = Actor.query.all()
+        if len(actors) == 0:
+            abort(404)
 
-    if restaurant is None:
-        abort(404)
-
-    restaurant.delete()
-
-    selection = Restaurant.query.order_by(Restaurant.id).all()
-    current_restaurants = paginate_restaurants(request, selection)
-
-    return jsonify(
-        {
-            'success': True,
-            'current_restaurants': current_restaurants,
-            'total_restaurants': len(current_restaurants),
-            'deleted': rest_id
-        }
-    )
-
-
-@app.route('/restaurants/<int:rest_id>/edit', methods=['PATCH'])
-@requires_auth('edit:restaurant')
-def edit_restaurant_submission(jwt, rest_id):
-    body = request.get_json()
-
-    if body is None:
-        abort(422)
-
-    rest = Restaurant.query.filter(Restaurant.id == rest_id).one_or_none()
-
-    rest.name = body.get('name')
-    rest.address = body.get('address')
-    rest.category = body.get('category')
-    rest.photo = body.get('photo')
-    rest.tel = body.get('tel')
-    rest.menu = body.get('menu')
-    rest.capacity = body.get('capacity')
-    rest.open_time = body.get('open_time')
-    rest.close_time = body.get('close_time')
-
-    rest.update()
-
-    selection = Restaurant.query.order_by(Restaurant.id).all()
-
-    current_restaurants = paginate_restaurants(request, selection)
-
-    return jsonify(
-        {
-            'current_restaurants': current_restaurants,
-            'edited': rest_id,
-            'success': True
-        }
-    )
-
-# reservations
-@app.route('/reservations/create', methods=['POST'])
-@requires_auth('make:reservation')
-def make_reservations(jwt):
-    email = request.args.get('customer_email', type=str)
-    customer_id = db.session.query(Customer.id).filter(
-        Customer.email == email).one_or_none()
-
-    if customer_id is None:
-        abort(404)
-
-    rest_name = request.args.get('rest_name', type=str)
-    rest_id = db.session.query(Restaurant.id).filter(
-        Restaurant.name == rest_name).one_or_none()
-
-    if rest_id is None:
-        abort(404)
-
-    body = request.get_json()
-
-    if body is None:
-        abort(422)
-
-    time = body.get('time')
-    number = body.get('number')
-
-    if capacity_check(time, rest_id, number):
-        rsvn = Reservation()
-        rsvn.rest_id = rest_id
-        rsvn.customer_id = customer_id
-
-        rsvn.number = number
-        rsvn.time = time
-        rsvn.request = body.get('request', None)
-
-        rsvn.insert()
-
-        reservation_details = {
-            'customer': rsvn.customer.format(),
-            'restaurant': rsvn.rest.format(),
-            'reservation': rsvn.format()
-        }
-
-        return jsonify(
-            {
-                'success': True,
-                'reservation': reservation_details
-            }
-        )
-
-    else:
         return jsonify({
-            'message': "This restaurant is fully booked. Check other times.",
-            'success': False
-        })
-
-
-@app.route('/reservations/<int:customer_id>')
-@requires_auth('get:reservations')
-def show_reservations_list_for_customer(jwt, customer_id):
-    reservations = Reservation.query.order_by(Reservation.time).filter(
-        Reservation.customer_id == customer_id).all()
-
-    if reservations == []:
-        abort(404)
-
-    past_reservations = []
-    upcoming_reservations = []
-
-    for reservation in reservations:
-        if reservation.time < datetime.now():
-            past_reservations.append(reservation.format())
-        else:
-            upcoming_reservations.append(reservation.format())
-
-    return jsonify(
-        {
             'success': True,
-            'past_reservations': past_reservations,
-            'upcoming_reservations': upcoming_reservations
-        }
-    )
+            'actors': [actor.long() for actor in actors],
+            'total actors': len(actors)
+        }), 200
 
+    @app.route('/actors', methods=['POST'])
+    @requires_auth('post:actors')
+    def add_actors(payload):
+        body = request.get_json()
+        a_name = body.get('name', None)
+        a_age = body.get('age', None)
+        a_gender = body.get('gender', None)
 
-@app.route('/reservations/<int:rest_id>/owner')
-@requires_auth('check:reservations')
-def show_reservations_list_for_restaurant(jwt, rest_id):
-    reservations = Reservation.query.order_by(
-        Reservation.time).filter(Reservation.rest_id == rest_id).all()
-
-    if reservations == []:
-        abort(404)
-
-    past_reservations = []
-    upcoming_reservations = []
-
-    for reservation in reservations:
-        customer = reservation.customer
-        if reservation.time < datetime.now():
-            data = {
-                'reservations': reservation.format(),
-                'customer': customer.format()
-            }
-            past_reservations.append(data)
-        else:
-            data = {
-                'reservations': reservation.format(),
-                'customer': customer.format()
-            }
-            upcoming_reservations.append(data)
-
-    return jsonify(
-        {
-            'success': True,
-            'past_reservations': past_reservations,
-            'upcoming_reservations': upcoming_reservations
-        }
-    )
-
-
-@app.route('/reservations/<int:reservation_id>/review', methods=['PATCH'])
-@requires_auth('post:review')
-def review_past_reservations(jwt, reservation_id):
-    rsvn = Reservation.query.filter(
-        Reservation.id == reservation_id).one_or_none()
-
-    if rsvn is None:
-        abort(404)
-
-    body = request.get_json()
-
-    if body is None:
-        abort(422)
-
-    review = body.get('review')
-    rsvn.review = review
-
-    rsvn.update()
-
-    return jsonify(
-        {
-            'reservation': rsvn.format(),
-            'success': True
-        }
-    )
-
-
-@app.route('/reservations/<int:reservation_id>/edit', methods=['PATCH'])
-@requires_auth('edit:reservation')
-def edit_upcoming_reservation_submission(jwt, reservation_id):
-    body = request.get_json()
-
-    if body is None:
-        abort(422)
-
-    rsvn = Reservation.query.filter(
-        Reservation.id == reservation_id).one_or_none()
-
-    if rsvn is None:
-        abort(404)
-
-    rest_id = rsvn.rest.id
-    rsvn.number = body.get('number')
-    rsvn.time = body.get('time')
-    rsvn.request = body.get('request', None)
-
-    capacity = capacity_check(rsvn.time, rest_id, rsvn.number)
-
-    if capacity:
-        rsvn.update()
-
-        return jsonify(
-            {
-                'reservation': rsvn.format(),
-                'success': True
-            }
+        new_actor = Actor(
+            name=a_name,
+            age=a_age,
+            gender=a_gender
         )
 
-    else:
-        return jsonify(
-            {
-                'success': False,
-                'message': "The number is over capactiy."
-            }
+        new_actor.insert()
+
+        return jsonify({
+            'success': True,
+            'created': new_actor.long(),
+            'total actors': len(Actor.query.all())
+        }), 200
+
+    @app.route('/movies', methods=['POST'])
+    @requires_auth('post:movies')
+    def add_movies(payload):
+        body = request.get_json()
+        a_name = body.get('name', None)
+        a_date = body.get('date', None)
+
+        new_movie = Movie(
+            name=a_name,
+            date=a_date
         )
 
-# customers
-@app.route('/customers')
-@requires_auth('get:customers')
-def get_customers(jwt):
-    customers = Customer.query.all()
+        new_movie.insert()
 
-    current_customers = []
-
-    for customer in customers:
-        current_customers.append(customer.format())
-
-    return jsonify(
-        {
+        return jsonify({
             'success': True,
-            'current_customers': current_customers,
-            'total_customers': len(current_customers)
-        }
-    )
+            'created': new_movie.long(),
+            'total movies': len(Movie.query.all())
+        }), 200
 
+    @app.route('/actors/<int:actor_id>', methods=['DELETE'])
+    @requires_auth('delete:actors')
+    def delete_actors(payload, actor_id):
+        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+        if actor is None:
+            abort(404)
 
-@app.route('/customers/create', methods=['POST'])
-@requires_auth('post:customer')
-def create_customer(jwt):
-    body = request.get_json()
+        actor.delete()
 
-    if body is None:
-        abort(422)
+        return jsonify({
+            'success': True,
+            'actor': actor_id
+        }), 200
 
-    customer = Customer()
+    @app.route('/actors/<id>', methods=['PATCH'])
+    @requires_auth('patch:actors')
+    def edit_actors(payload, id):
+        try:
+            body = request.get_json()
+            actor = Actor.query.filter(Actor.id == id).one_or_none()
 
-    customer.name = body.get('name')
-    customer.phone = body.get('phone')
-    customer.email = body.get('email')
+            if not actor:
+                abort(404)
 
-    customer.insert()
+            a_name = body.get('name')
+            a_age = body.get('age')
+            a_gender = body.get('gender', None)
 
-    return jsonify(
-        {
-            'customer': customer.format(),
-            'success': True
-        }
-    )
+            if a_name:
+                actor.name = a_name
 
+            if a_age:
+                actor.age = a_age
 
-@app.route('/customers/<int:customer_id>/edit', methods=['POST'])
-@requires_auth('edit:customer')
-def edit_customer_submission(jwt, customer_id):
-    body = request.get_json()
+            if a_gender:
+                actor.gender = a_gender
 
-    if body is None:
-        abort(422)
+            actor.update()
 
-    customer = Customer.query.filter(
-        Customer.id == customer_id).one_or_none()
+            return jsonify({'success': True, 'actor': a_name}), 200
 
-    if customer is None:
-        abort(404)
+        except Exception:
+            abort(400)
+    # Error Handling
 
-    customer.name = body.get('name')
-    customer.phone = body.get('phone')
-    customer.email = body.get('email')
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+                        "success": False,
+                        "error": 422,
+                        "message": "unprocessable"
+                        }), 422
 
-    customer.update()
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "unauthorized"
+        }), 401
 
-    return jsonify(
-        {
-            'customer': customer.format(),
-            'success': True
-        }
-    )
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request"
+        }), 401
 
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "messange": "resource not found"
+        }), 404
 
-@app.route('/customers/<int:customer_id>', methods=['DELETE'])
-@requires_auth('delete:customer')
-def delete_customer(jwt, customer_id):
-    customer = Customer.query.filter(
-        Customer.id == customer_id).one_or_none()
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": "internal service error"
+        }), 500
 
-    if customer is None:
-        abort(404)
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": "authorization error"
+        }), error.status_code
 
-    customer.delete()
-
-    current_customers = Customer.query.all()
-
-    return jsonify(
-        {
-            'deleted': customer_id,
-            'success': True
-        }
-    )
-
-# Error Handling
-@app.errorhandler(AuthError)
-def authentification_failed(AuthError):
-    return jsonify({
-        "success": False,
-        "error": AuthError.status_code,
-        "message": "Authentification Fails"
-    }), 401
-
-
-@app.errorhandler(404)
-def authentification_failed(AuthError):
-    return jsonify({
-        "success": False,
-        "error": 404,
-        "message": "Resource Not Found"
-    }), 404
-
-
-@app.errorhandler(422)
-def unprocessable(error):
-    return jsonify({
-        'success': False,
-        'maessage': 'Not Processable',
-        'error': 422
-    }), 422
-
-
-@app.errorhandler(405)
-def method_not_allowed(error):
-    return jsonify(
-        {
-            'success': False,
-            'message': 'Method not allowed',
-            'error': 405
-        }
-    ), 405
-
+    return app
+    
+app = create_app()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
