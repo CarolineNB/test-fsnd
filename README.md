@@ -29,8 +29,11 @@ This will install all of the required packages we selected within the `requireme
 - [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use handle the lightweight sqlite database. You'll primarily work in app.py and can reference models.py. 
 
 - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server. 
+
+
 ## Deployment
-This app is currently hosted on heroku: [link](https://dashboard.heroku.com/apps/test-heroku-cb/settings)
+This app is currently hosted on heroku: [link](https://test-heroku-cb.herokuapp.com/)
+
 ## Running the server
 
 Within this directory first ensure you are working using your created virtual environment.
