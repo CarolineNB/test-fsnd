@@ -1,6 +1,11 @@
 # Casting Agency
 
-This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers. This project is the final project of the Udacity Full Stack Nano-Developer Degree program and exhibits the following skills:
+This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers. 
+
+## Motivation 
+The motivation for this project is to provide a basic backend platform that could be integrated for a wide set of uses. The particular use for this project models a casting agency company. 
+
+This project is the final project of the Udacity Full Stack Nano-Developer Degree program and exhibits the following skills:
 
 - Coding in Python 3
 - Modeling Data Objects with SQLAlchemy
