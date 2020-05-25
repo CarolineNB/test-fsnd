@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app import create_app
 from models import setup_db, Movie, Actor
 
+
 class CastingTestCase(unittest.TestCase):
     """This class represents the casting test case"""
 
@@ -13,9 +14,9 @@ class CastingTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.assistant = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtnekozVTAyaGFvWkwwajJDMmdEVSJ9.eyJpc3MiOiJodHRwczovL2NiLWNhcHN0b25lLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZWNhYmM3MTkyZGNlODBjNmYxODBmZDIiLCJhdWQiOiJDYXN0cyIsImlhdCI6MTU5MDQyMzQzNCwiZXhwIjoxNTkwNTA5ODM0LCJhenAiOiJ6SnV0WDJNbEVyalRUTEpPT0FCT0dnekdyWTFiTkVnTSIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiXX0.w8nsBM5QpU0hmHSyp8U0eXol-GAJXCYOqIpAgYetBmAIYuHM0SaSLbIDbVQGQXgWKZbgl3920MqK6oSE9POKmAcyW64_Z01idH3LCjiNLGZJly2agX4kbB7C0Ozx5ZH5xJFZvV4uYEvus_ok3zDaCtkdU7gdAYoaaP6MQZs1i6QL65q8Xe9UBaIaTlb4u6Qopzvo-pIyDdY31fLIo2EohFJI_duGjsti5Hb2djp56JfGAvFKOpxOKA29iluVRnpNujOv7_-xiwBc6zsncREjL9W3xzGo1SLqiwRi1wf6TrxG01zXGtKj5ebO_Rj9wQ9YKx_oiOLNF21DfbPMmnoh5Q"
-        self.director = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtnekozVTAyaGFvWkwwajJDMmdEVSJ9.eyJpc3MiOiJodHRwczovL2NiLWNhcHN0b25lLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZWNhYmQwMWVlNTZjNDBjNmQ4NTRmZDYiLCJhdWQiOiJDYXN0cyIsImlhdCI6MTU5MDQyMzQ3NCwiZXhwIjoxNTkwNTA5ODc0LCJhenAiOiJ6SnV0WDJNbEVyalRUTEpPT0FCT0dnekdyWTFiTkVnTSIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9ycyIsImdldDphY3RvcnMiLCJnZXQ6bW92aWVzIiwicGF0Y2g6YWN0b3JzIiwicG9zdDphY3RvcnMiXX0.qsfhLBzbqmFSQwdaDQuZ5Qh2RidRZKrEISH6jl5oU8BweSsA7X33nl7jFbNurgjkUIKmTXPCvxDu8X2OfofPjQ5ZjXPo5odwhLS8BojIc-X86P7HeV6EmLQI3R0T6lgrG2ZP1k9ooqqWOA5MHA6vnUlcyt0WKlWPiT65Xly32gw5U3ObcADFJxkHF_LHAcxlxdTZJ11mHsGYExcJ293m7YWkprrJrw2dGWbCzKDRCU595uvpHjtmuPdCyZMZnCW5O-KrlyS8Jgnwq7QEbqLFIAWB-Y3AIPMFdotvDYmhIrtY4R1tlSfei7Y8XN-tG42P_mz2AfI5GSQAOCr0H_BygA"
-        self.producer = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtnekozVTAyaGFvWkwwajJDMmdEVSJ9.eyJpc3MiOiJodHRwczovL2NiLWNhcHN0b25lLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZWNhYmQyMTkyZGNlODBjNmYxODE0M2UiLCJhdWQiOiJDYXN0cyIsImlhdCI6MTU5MDQyMzUyNiwiZXhwIjoxNTkwNTA5OTI2LCJhenAiOiJ6SnV0WDJNbEVyalRUTEpPT0FCT0dnekdyWTFiTkVnTSIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9ycyIsImRlbGV0ZTptb3ZpZXMiLCJnZXQ6YWN0b3JzIiwiZ2V0Om1vdmllcyIsInBhdGNoOmFjdG9ycyIsInBvc3Q6YWN0b3JzIiwicG9zdDptb3ZpZXMiXX0.Jap4hi6zfWeYZBKmSjZ6C2LTjsyS-3PGrVmlOyRYouqgwMFlzRybhmTu8bOz5KEguOL3tJIBzNcrRNjdKgAOmaydjaZFaHXkpt_hqaxHSy8rgEXn12W_W2A6vNto8jDlNw1lK2k8mI2UZxnEpa0qTVfwLbaHMNTwvoXXk6J3KZfsr5ylvxVbqfm7Sn4Bot_Ggt94EQ4y9e7gGzts0SGXrE6fc9sqqQ2BqlOwHClOjdYvovL7MPVIZIee6UbJ_zz7bFWgHP9JdbDv0hT0Zv_HMRyTg7qAkQmBGOqBz_ODBa7ZFMu1CpTLj9sbqcDfN4OFr1m2ES8QiFy1m8Xjo7mcbQ"
+        self.assistant = os.environ.get('assistant_token')
+        self.director = os.environ.get('director_token')
+        self.producer = os.environ.get('producer_token')
         self.database_name = "capstone_test"
         self.database_path = "postgresql://postgres: @localhost:5432/{}"\
             .format(self.database_name)
@@ -152,7 +153,7 @@ class CastingTestCase(unittest.TestCase):
             'gender': 'gender2',
             'age': 223
         }
-        res = self.client().patch('/actors/5',
+        res = self.client().patch('/actors/7',
                                   headers={
                                      "Authorization":
                                      "Bearer {}".format(
@@ -238,6 +239,7 @@ class CastingTestCase(unittest.TestCase):
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

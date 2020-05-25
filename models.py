@@ -60,12 +60,6 @@ class Movie(db.Model):
           }
 
 
-'''
-Actor
-Has name, age, and gender
-'''
-
-
 class Actor(db.Model):
     __tablename__ = 'Actors'
     id = Column(Integer, primary_key=True)
