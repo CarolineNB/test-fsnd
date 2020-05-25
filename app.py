@@ -24,7 +24,7 @@ def create_app(test_config=None):
 
     @app.route('/')
     def get_greeting():
-        greeting = "Hello"
+        greeting = "Hello! Welcome to Casting Agency!"
         return greeting
 
     @app.route('/movies', methods=['GET'])
@@ -193,7 +193,7 @@ def create_app(test_config=None):
         }), error.status_code
 
     return app
-    
+
 app = create_app()
 
 if __name__ == "__main__":
