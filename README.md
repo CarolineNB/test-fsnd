@@ -1,18 +1,24 @@
 # Casting Agency
 
 This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers. This project is the final project of the Udacity Full Stack Nano-Developer Degree program and exhibits the following skills:
-```
-Coding in Python 3
-Modeling Data Objects with SQLAlchemy
-Internet Protocols and Communication
-Developing a Flask API
-Authentication and Access
-Authentication with Auth0
-Authentication in Flask
-Role-Based Access Control (RBAC)
-Testing Flask Applications
-Deploying Applications
-```
+
+- Coding in Python 3
+- Modeling Data Objects with SQLAlchemy
+  - The data objects of Actors and Movies are modeled with appropriate values
+- Developing a Flask API
+  - Routes perform CRUD operations and RESTful principles are followed throughout the proejct
+- Authentication and Access
+  - Includes different roles that have distinct permissions for actions that are defined in this README
+- Authentication with Auth0
+  - Roles and permssions are configured in Auth0
+- Authentication in Flask
+  - Project includes custom @requires_auth decorators 
+- Role-Based Access Control (RBAC)
+  - Unittests demonstrate role-based access control at specific endpoints
+- Testing Flask Applications
+  - Expected success and error scenarioous are included for each endpoint
+- Deploying Applications
+  - This API is hosted live via Heroku and can be accessed by this [url](https://test-heroku-cb.herokuapp.com/)
 
 All backend code follows PEP8 style guidelines.
 
