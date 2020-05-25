@@ -37,7 +37,7 @@ Within this directory first ensure you are working using your created virtual en
 To run the server, execute:
 
 ```bash
-set FLASK_APP=flaskr
+set FLASK_APP=app.py
 set FLASK_ENV=development
 flask run
 ```
