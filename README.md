@@ -67,7 +67,7 @@ This app handles users with multiple roles:
     - All permissions a Casting Director has and…
     - Add or delete a movie from the database
 
-This application only includes the ```backend```, corresponding authentication JWT headers are located [here!](https://github.com/CarolineNB/test-fsnd/blob/master/test.py). You can use it using cURL or Postman to interact with this app.
+This application only includes the ```backend```, corresponding authentication JWT headers are located [here](https://github.com/CarolineNB/test-fsnd/blob/master/test.py). You can use it using cURL or Postman to interact with this app.
 
 
 ## Error Handling
