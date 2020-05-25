@@ -1,6 +1,18 @@
 # Casting Agency
 
-This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers.
+This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers. This project is the final project of the Udacity Full Stack Nano-Developer Degree program and exhibits the following skills:
+```
+Coding in Python 3
+Modeling Data Objects with SQLAlchemy
+Internet Protocols and Communication
+Developing a Flask API
+Authentication and Access
+Authentication with Auth0
+Authentication in Flask
+Role-Based Access Control (RBAC)
+Testing Flask Applications
+Deploying Applications
+```
 
 All backend code follows PEP8 style guidelines.
 
