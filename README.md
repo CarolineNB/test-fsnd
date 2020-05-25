@@ -91,7 +91,7 @@ To run the tests, run
 dropdb capstone_test
 createdb capstone_test
 psql capstone_test < db.psql
-python test_flaskr.py
+python test.py
 ```
 
 ## Endpoints
