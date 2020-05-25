@@ -6,7 +6,7 @@ This application models a Casting Agency company that manages movies and actors.
 - Modeling Data Objects with SQLAlchemy
   - The data objects of Actors and Movies are modeled with appropriate values
 - Developing a Flask API
-  - Routes perform CRUD operations and RESTful principles are followed throughout the proejct
+  - Routes perform CRUD operations and RESTful principles are followed throughout the project
 - Authentication and Access
   - Includes different roles that have distinct permissions for actions that are defined in this README
 - Authentication with Auth0
