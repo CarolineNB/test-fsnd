@@ -29,7 +29,8 @@ This will install all of the required packages we selected within the `requireme
 - [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use handle the lightweight sqlite database. You'll primarily work in app.py and can reference models.py. 
 
 - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server. 
-
+## Deployment
+This app is currently hosted on heroku: [link](https://dashboard.heroku.com/apps/test-heroku-cb/settings)
 ## Running the server
 
 Within this directory first ensure you are working using your created virtual environment.
@@ -47,6 +48,7 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
 ## Getting Started
+
 This app handles users with multiple roles:
  - _Casting Assistant_
     - Can view actors and movies 
@@ -57,6 +59,9 @@ This app handles users with multiple roles:
  - _Executive Producer_
     - All permissions a Casting Director has and…
     - Add or delete a movie from the database
+
+This application only includes the ```backend```, corresponding authentication JWT headers are located [here!](https://github.com/CarolineNB/test-fsnd/blob/master/test.py). You can use it using cURL or Postman to interact with this app.
+
 
 ## Error Handling
 
