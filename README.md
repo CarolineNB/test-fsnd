@@ -1,5 +1,9 @@
 # Casting Agency
 
+This application models a Casting Agency company that manages movies and actors. It has the ability to host several users such as Casting Assistants, Casting Directors, and Executive Producers.
+
+All backend code follows PEP8 style guidelines.
+
 ## Getting Started
 
 ### Installing Dependencies
